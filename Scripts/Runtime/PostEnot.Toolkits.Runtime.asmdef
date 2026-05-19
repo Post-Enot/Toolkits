@@ -1,0 +1,14 @@
+{
+    "name": "PostEnot.Toolkits.Runtime",
+    "rootNamespace": "PostEnot.Toolkits",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

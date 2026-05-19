@@ -1,0 +1,12 @@
+{
+  "name": "com.postenot.toolkits",
+  "version": "0.0.1",
+  "displayName": "Toolkits",
+  "description": "",
+  "author": {
+    "name": "PostEnot",
+    "email": "ve.vyshegorodsky.cold@gmail.com",
+    "url": "https://t.me/ProcyonNihil"
+  },
+  "type": "library"
+}
