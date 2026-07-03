@@ -16,6 +16,11 @@ namespace PostEnot.Toolkits
         }
 
         /// <summary>
+        /// Возвращает временной интервал с нулевой длительностью и нулевой точкой отсчёта.
+        /// </summary>
+        public static TimeInterval Zero => new();
+
+        /// <summary>
         /// Возвращает временной интервал с бесконечной (<see cref="float.PositiveInfinity"/>) продолжительностью и нулевой точкой отсчёта.
         /// </summary>
         public static TimeInterval Infinity => new(0.0f, float.PositiveInfinity);
@@ -247,19 +252,15 @@ namespace PostEnot.Toolkits
         /// <summary>
         /// Создаёт новый интервал с указанными начальным временем и длительностью.
         /// </summary>
-        /// <param name="startTime">Начальное время. Не должно быть NaN.</param>
         /// <param name="duration">Длительность. Должна быть неотрицательной и не NaN.</param>
+        /// <param name="startTime">Начальное время. Не должно быть NaN.</param>
         /// <returns>Новый экземпляр <see cref="TimeInterval"/>.</returns>
         /// <exception cref="ArgumentException">
         /// <paramref name="startTime"/> равен NaN, либо <paramref name="duration"/> равен NaN.
         /// </exception>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="duration"/> отрицательна.</exception>
-        public static TimeInterval Create(float startTime, float duration)
+        public static TimeInterval Create(float duration, float startTime)
         {
-            if (float.IsNaN(startTime))
-            {
-                throw new ArgumentException($"{nameof(startTime)} can not be NaN.", nameof(startTime));
-            }
             if (float.IsNaN(duration))
             {
                 throw new ArgumentException($"{nameof(duration)} can not be NaN.", nameof(duration));
@@ -267,6 +268,10 @@ namespace PostEnot.Toolkits
             if (duration < 0.0f)
             {
                 throw new ArgumentOutOfRangeException(nameof(duration), $"{duration} must be positive number.");
+            }
+            if (float.IsNaN(startTime))
+            {
+                throw new ArgumentException($"{nameof(startTime)} can not be NaN.", nameof(startTime));
             }
             return new TimeInterval(startTime, duration);
         }
@@ -283,10 +288,10 @@ namespace PostEnot.Toolkits
         /// Создаёт новый интервал с указанными начальным временем и длительностью без проверки аргументов.
         /// Используйте только в критичных к производительности участках, когда уверены в корректности значений.
         /// </summary>
-        /// <param name="startTime">Начальное время.</param>
         /// <param name="duration">Длительность интервала.</param>
+        /// <param name="startTime">Начальное время.</param>
         /// <returns>Новый экземпляр <see cref="TimeInterval"/>.</returns>
-        public static TimeInterval CreateUnsafe(float startTime, float duration) => new(startTime, duration);
+        public static TimeInterval CreateUnsafe(float duration, float startTime) => new(startTime, duration);
 
         /// <summary>
         /// Создаёт интервал, который уже завершён к моменту времени 0 (начальное время равно -<paramref name="duration"/>).
@@ -313,14 +318,14 @@ namespace PostEnot.Toolkits
         /// Создаёт интервал, завершённый к указанному текущему времени.
         /// Начальное время вычисляется как <paramref name="currentTime"/> - <paramref name="duration"/>.
         /// </summary>
-        /// <param name="currentTime">Текущий момент времени. Не должен быть NaN.</param>
         /// <param name="duration">Длительность. Должна быть неотрицательной и не NaN.</param>
+        /// <param name="currentTime">Текущий момент времени. Не должен быть NaN.</param>
         /// <returns>Завершённый экземпляр <see cref="TimeInterval"/>.</returns>
         /// <exception cref="ArgumentException">
         /// <paramref name="currentTime"/> равен NaN, либо <paramref name="duration"/> равен NaN.
         /// </exception>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="duration"/> отрицательна.</exception>
-        public static TimeInterval CreateCompleted(float currentTime, float duration)
+        public static TimeInterval CreateCompleted(float duration, float currentTime)
         {
             if (float.IsNaN(currentTime))
             {
@@ -353,7 +358,7 @@ namespace PostEnot.Toolkits
         /// <param name="currentTime">Текущий момент времени.</param>
         /// <param name="duration">Длительность интервала.</param>
         /// <returns>Завершённый экземпляр <see cref="TimeInterval"/>.</returns>
-        public static TimeInterval CreateCompletedUnsafe(float currentTime, float duration)
+        public static TimeInterval CreateCompletedUnsafe(float duration, float currentTime)
         {
             float startTime = currentTime - duration;
             return new TimeInterval(startTime, duration);
