@@ -59,6 +59,7 @@ namespace PostEnot.Toolkits.StateMachines.HFSM
         public TStateBase ActiveChildState { get; internal set; }
 
         public bool IsActive => _stateSetter != null;
+        public bool IsNotActive => _stateSetter == null;
 
         private IStateSetter<TStateBase, TContext> _stateSetter;
 

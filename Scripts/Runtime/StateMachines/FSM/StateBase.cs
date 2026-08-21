@@ -47,6 +47,10 @@ namespace PostEnot.Toolkits.StateMachines.FSM
         /// Является ли данное состояние активным в данный момент.
         /// </summary>
         public bool IsActive => _stateSetter != null;
+        /// <summary>
+        /// Является ли данное состояние не активным в данный момент.
+        /// </summary>
+        public bool IsNotActive => _stateSetter == null;
 
         private IStateSetter<TStateBase, TContext> _stateSetter;
 
