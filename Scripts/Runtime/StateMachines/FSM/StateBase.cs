@@ -43,6 +43,10 @@ namespace PostEnot.Toolkits.StateMachines.FSM
         /// Контекст, общий для всех состояний.
         /// </summary>
         public TContext Context { get; private set; }
+        /// <summary>
+        /// Является ли данное состояние активным в данный момент.
+        /// </summary>
+        public bool IsActive => _stateSetter != null;
 
         private IStateSetter<TStateBase, TContext> _stateSetter;
 
