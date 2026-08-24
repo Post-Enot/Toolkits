@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Buffers.Binary;
+using System.Security.Cryptography;
 
 namespace PostEnot.Toolkits.RandomEngines
 {
@@ -7,6 +8,17 @@ namespace PostEnot.Toolkits.RandomEngines
     {
         internal const float Inverse2Pow24 = 1.0f / (1U << 24);
         internal const double Inverse2Pow53 = 1.0 / (1UL << 53);
+
+        public static IRandom RandomForEditor()
+        {
+            Span<byte> buffer = stackalloc byte[16];
+            using RandomNumberGenerator random = RandomNumberGenerator.Create();
+            random.GetBytes(buffer);
+            ulong seed = BinaryPrimitives.ReadUInt64LittleEndian(buffer);
+            ulong sequence = BinaryPrimitives.ReadUInt64LittleEndian(buffer[8..]);
+            Pcg32 engine = new(seed, sequence);
+            return new RandomEngineSampler(engine);
+        }
 
         internal static void NextBytesFromUInt64(IRandomEngine engine, Span<byte> buffer)
         {
