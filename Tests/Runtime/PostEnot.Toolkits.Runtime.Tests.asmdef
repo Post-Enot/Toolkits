@@ -1,0 +1,21 @@
+{
+    "name": "PostEnot.Toolkits.Runtime.Tests",
+    "rootNamespace": "PostEnot.Toolkits.Tests",
+    "references": [
+        "GUID:03fa8d9d2ed266a4cb1f5bbff88464fc"
+    ],
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

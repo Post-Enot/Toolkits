@@ -1,0 +1,97 @@
+﻿using System;
+using System.Buffers.Binary;
+using System.Runtime.CompilerServices;
+
+namespace PostEnot.Toolkits.RandomEngines
+{
+    public sealed class Xoshiro256StarStar : IRandomEngine
+    {
+        public int StateSizeInBytes => sizeof(ulong) * 4;
+
+        public ulong State0 { get; private set; }
+        public ulong State1 { get; private set; }
+        public ulong State2 { get; private set; }
+        public ulong State3 { get; private set; }
+
+        public Xoshiro256StarStar(ulong s0, ulong s1, ulong s2, ulong s3)
+        {
+            State0 = s0;
+            State1 = s1;
+            State2 = s2;
+            State3 = s3;
+        }
+
+        public byte[] GetState()
+        {
+            byte[] state = new byte[StateSizeInBytes];
+            Span<byte> buffer = state.AsSpan();
+            BinaryPrimitives.WriteUInt64LittleEndian(buffer[..8], State0);
+            BinaryPrimitives.WriteUInt64LittleEndian(buffer.Slice(8, 8), State1);
+            BinaryPrimitives.WriteUInt64LittleEndian(buffer.Slice(16, 8), State2);
+            BinaryPrimitives.WriteUInt64LittleEndian(buffer.Slice(24, 8), State3);
+            return state;
+        }
+
+        public void GetState(Span<byte> buffer)
+        {
+            if (buffer.Length < StateSizeInBytes)
+            {
+                throw new ArgumentException("Buffer is too small.", nameof(buffer));
+            }
+            BinaryPrimitives.WriteUInt64LittleEndian(buffer[..8], State0);
+            BinaryPrimitives.WriteUInt64LittleEndian(buffer.Slice(8, 8), State1);
+            BinaryPrimitives.WriteUInt64LittleEndian(buffer.Slice(16, 8), State2);
+            BinaryPrimitives.WriteUInt64LittleEndian(buffer.Slice(24, 8), State3);
+        }
+
+        public void SetState(ReadOnlySpan<byte> state)
+        {
+            if (!TrySetState(state))
+            {
+                throw new ArgumentException("Invalid state.", nameof(state));
+            }
+        }
+
+        public bool TrySetState(ReadOnlySpan<byte> state)
+        {
+            if (state.Length < StateSizeInBytes)
+            {
+                return false;
+            }
+            State0 = BinaryPrimitives.ReadUInt64LittleEndian(state[..8]);
+            State1 = BinaryPrimitives.ReadUInt64LittleEndian(state.Slice(8, 8));
+            State2 = BinaryPrimitives.ReadUInt64LittleEndian(state.Slice(16, 8));
+            State3 = BinaryPrimitives.ReadUInt64LittleEndian(state.Slice(24, 8));
+            return true;
+        }
+
+        public bool NextBoolean() => NextUInt64() >> 63 == 1;
+
+        public float NextSingle() => (NextUInt64() >> 40) * RandomUtilities.Inverse2Pow24;
+
+        public double NextDouble() => (NextUInt64() >> 11) * RandomUtilities.Inverse2Pow53;
+
+        public void NextBytes(Span<byte> buffer) => RandomUtilities.NextBytesFromUInt64(this, buffer);
+
+        public uint NextUInt32() => (uint)(NextUInt64() >> 32);
+
+        public ulong NextUInt64()
+        {
+            unchecked
+            {
+                ulong result = RotateLeft(State1 * 5, 7) * 9;
+                ulong t = State1 << 17;
+                State2 ^= State0;
+                State3 ^= State1;
+                State1 ^= State2;
+                State0 ^= State3;
+                State2 ^= t;
+                State3 = RotateLeft(State3, 45);
+                return result;
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static ulong RotateLeft(ulong x, int k) => (x << k) | (x >> (64 - k));
+    }
+}
