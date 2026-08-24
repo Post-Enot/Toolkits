@@ -5,6 +5,10 @@ namespace PostEnot.Toolkits.RandomEngines
 {
     public sealed class SplitMix64 : IRandomEngine
     {
+        public SplitMix64(ulong state) => State = state;
+
+        public SplitMix64(ReadOnlySpan<byte> state) => SetState(state);
+
         public const ulong GoldenGamma = 0x9E3779B97F4A7C15UL;
         public const ulong Mix1 = 0xBF58476D1CE4E5B9UL;
         public const ulong Mix2 = 0x94D049BB133111EBUL;

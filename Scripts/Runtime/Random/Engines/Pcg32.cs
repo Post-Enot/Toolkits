@@ -5,13 +5,6 @@ namespace PostEnot.Toolkits.RandomEngines
 {
     public sealed class Pcg32 : IRandomEngine
     {
-        private const ulong Multiplier = 6364136223846793005UL;
-
-        public ulong State { get; private set; }
-        public ulong Increment { get; private set; }
-
-        public int StateSizeInBytes => 16;
-
         public Pcg32(ulong seed, ulong sequence)
         {
             Increment = (sequence << 1) | 1UL;
@@ -20,6 +13,15 @@ namespace PostEnot.Toolkits.RandomEngines
             State += seed;
             NextUInt32();
         }
+
+        public Pcg32(ReadOnlySpan<byte> state) => SetState(state);
+
+        private const ulong Multiplier = 6364136223846793005UL;
+
+        public ulong State { get; private set; }
+        public ulong Increment { get; private set; }
+
+        public int StateSizeInBytes => 16;
 
         public byte[] GetState()
         {

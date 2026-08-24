@@ -6,20 +6,22 @@ namespace PostEnot.Toolkits.RandomEngines
 {
     public sealed class Xoshiro256StarStar : IRandomEngine
     {
+        public Xoshiro256StarStar(ulong state0, ulong state1, ulong state2, ulong state3)
+        {
+            State0 = state0;
+            State1 = state1;
+            State2 = state2;
+            State3 = state3;
+        }
+
+        public Xoshiro256StarStar(ReadOnlySpan<byte> state) => SetState(state);
+
         public int StateSizeInBytes => sizeof(ulong) * 4;
 
         public ulong State0 { get; private set; }
         public ulong State1 { get; private set; }
         public ulong State2 { get; private set; }
         public ulong State3 { get; private set; }
-
-        public Xoshiro256StarStar(ulong s0, ulong s1, ulong s2, ulong s3)
-        {
-            State0 = s0;
-            State1 = s1;
-            State2 = s2;
-            State3 = s3;
-        }
 
         public byte[] GetState()
         {
