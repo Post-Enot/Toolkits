@@ -237,6 +237,16 @@ namespace PostEnot.Toolkits
             }
         }
 
+        public void Shuffle<T>(T[] array)
+        {
+            if (array == null)
+            {
+                throw new ArgumentNullException(nameof(array));
+            }
+            Span<T> span = array.AsSpan();
+            Shuffle(span);
+        }
+
         public T NextElement<T>(ReadOnlySpan<T> span)
         {
             if (span.Length == 0)
@@ -245,6 +255,20 @@ namespace PostEnot.Toolkits
             }
             int index = NextInt32(span.Length);
             return span[index];
+        }
+
+        public T NextElement<T>(T[] array)
+        {
+            if (array == null)
+            {
+                throw new ArgumentNullException(nameof(array));
+            }
+            if (array.Length == 0)
+            {
+                throw new ArgumentException($"{nameof(array)} is empty.", nameof(array));
+            }
+            int index = NextInt32(array.Length);
+            return array[index];
         }
 
         public T[] GetItems<T>(ReadOnlySpan<T> choices, int length)

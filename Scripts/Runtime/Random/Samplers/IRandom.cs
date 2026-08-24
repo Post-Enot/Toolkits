@@ -272,6 +272,14 @@ namespace PostEnot.Toolkits
         public void Shuffle<T>(Span<T> span);
 
         /// <summary>
+        /// Перемешивает элементы в указанном массиве.
+        /// </summary>
+        /// <typeparam name="T">Тип элементов массива.</typeparam>
+        /// <param name="array">Перемешиваемый массив.</param>
+        /// <exception cref="ArgumentNullException">Если <paramref name="array"/> равен <see langword="null"/>.</exception>
+        public void Shuffle<T>(T[] array);
+
+        /// <summary>
         /// Возвращает случайный элемент из диапазона.
         /// </summary>
         /// <typeparam name="T">Тип элементов диапазона.</typeparam>
@@ -279,6 +287,16 @@ namespace PostEnot.Toolkits
         /// <returns>Случайный элемент диапазона.</returns>
         /// <exception cref="ArgumentException">Если диапазон пуст.</exception>
         public T NextElement<T>(ReadOnlySpan<T> span);
+
+        /// <summary>
+        /// Возвращает случайный элемент из массива.
+        /// </summary>
+        /// <typeparam name="T">Тип элементов массива.</typeparam>
+        /// <param name="array">Массив, из которого выбирается элемент.</param>
+        /// <returns>Случайный элемент массива.</returns>
+        /// <exception cref="ArgumentException">Если массив пуст.</exception>
+        /// <exception cref="ArgumentNullException">Если <paramref name="array"/> равен <see langword="null"/>.</exception>
+        public T NextElement<T>(T[] array);
 
         /// <summary>
         /// Создает массив заданной длины и заполняет его случайными элементами из указанного набора.
