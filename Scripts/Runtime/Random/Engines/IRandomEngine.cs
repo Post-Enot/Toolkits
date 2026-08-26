@@ -11,7 +11,11 @@ namespace PostEnot.Toolkits
         public void GetState(Span<byte> buffer);
         public void SetState(ReadOnlySpan<byte> state);
         public bool TrySetState(ReadOnlySpan<byte> state);
-        
+
+        // Пропускает следующее значение.
+        public void Discard();
+        // Пропускает следующие n значений.
+        public void Discard(int number);
         // Гарантируется [uint.MinValue, uint.MaxValue]
         public uint NextUInt32();
         // Гарантируется [ulong.MinValue, ulong.MaxValue]

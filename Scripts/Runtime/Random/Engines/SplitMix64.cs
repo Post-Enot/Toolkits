@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Buffers.Binary;
+using System.Runtime.CompilerServices;
 
 namespace PostEnot.Toolkits.RandomEngines
 {
@@ -28,7 +29,7 @@ namespace PostEnot.Toolkits.RandomEngines
         {
             if (buffer.Length < StateSizeInBytes)
             {
-                throw new ArgumentException("Buffer is too small.", nameof(buffer));
+                throw RandomUtilities.ExceptionBufferTooSmall(nameof(buffer), StateSizeInBytes);
             }
             BinaryPrimitives.WriteUInt64LittleEndian(buffer, State);
         }
@@ -37,7 +38,7 @@ namespace PostEnot.Toolkits.RandomEngines
         {
             if (!TrySetState(state))
             {
-                throw new ArgumentException("Invalid state.", nameof(state));
+                throw RandomUtilities.ExceptionInvalidState(nameof(state));
             }
         }
 
@@ -49,6 +50,27 @@ namespace PostEnot.Toolkits.RandomEngines
             }
             State = BinaryPrimitives.ReadUInt64LittleEndian(state[..8]);
             return true;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Discard()
+        {
+            unchecked
+            {
+                State += GoldenGamma;
+            }
+        }
+
+        public void Discard(int number)
+        {
+            if (number < 0)
+            {
+                throw RandomUtilities.ExceptionDiscardNumberLessThanZero(nameof(number));
+            }
+            for (int i = 0; i < number; i += 1)
+            {
+                Discard();
+            }
         }
 
         public bool NextBoolean() => NextUInt64() >> 63 == 1;

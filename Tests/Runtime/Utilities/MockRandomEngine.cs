@@ -131,5 +131,9 @@ namespace PostEnot.Toolkits.Tests
                 buffer[i] = _bytePattern[i % _bytePattern.Length];
             }
         }
+
+        public void Discard() { }
+
+        public void Discard(int number) { }
     }
 }

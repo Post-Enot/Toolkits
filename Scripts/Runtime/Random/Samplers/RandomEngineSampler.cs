@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace PostEnot.Toolkits
@@ -12,13 +13,13 @@ namespace PostEnot.Toolkits
 
         public bool NextBoolean() => Engine.NextBoolean();
 
-        public byte[] NextBytes(int number)
+        public byte[] NextBytes(int length)
         {
-            if (number < 0)
+            if (length < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(number), $"{nameof(number)} must be non-negative.");
+                throw new ArgumentOutOfRangeException(nameof(length), $"{nameof(length)} must be non-negative.");
             }
-            byte[] result = new byte[number];
+            byte[] result = new byte[length];
             Engine.NextBytes(result);
             return result;
         }
@@ -149,7 +150,7 @@ namespace PostEnot.Toolkits
                     nameof(maxExclusive),
                     $"{nameof(maxExclusive)} must be finite and greater than or equal to {nameof(minInclusive)}.");
             }
-            return minInclusive + Engine.NextSingle() * (maxExclusive - minInclusive);
+            return minInclusive + (Engine.NextSingle() * (maxExclusive - minInclusive));
         }
 
         public double NextDouble() => Engine.NextDouble();
@@ -247,6 +248,19 @@ namespace PostEnot.Toolkits
             Shuffle(span);
         }
 
+        public void Shuffle<T>(IList<T> list)
+        {
+            if (list == null)
+            {
+                throw new ArgumentNullException(nameof(list));
+            }
+            for (int i = list.Count - 1; i > 0; i -= 1)
+            {
+                int j = NextInt32(i + 1);
+                (list[i], list[j]) = (list[j], list[i]);
+            }
+        }
+
         public T NextElement<T>(ReadOnlySpan<T> span)
         {
             if (span.Length == 0)
@@ -269,6 +283,20 @@ namespace PostEnot.Toolkits
             }
             int index = NextInt32(array.Length);
             return array[index];
+        }
+
+        public T NextElement<T>(IReadOnlyList<T> list)
+        {
+            if (list == null)
+            {
+                throw new ArgumentNullException(nameof(list));
+            }
+            if (list.Count == 0)
+            {
+                throw new ArgumentException($"{nameof(list)} is empty.", nameof(list));
+            }
+            int index = NextInt32(list.Count);
+            return list[index];
         }
 
         public T[] GetItems<T>(ReadOnlySpan<T> choices, int length)

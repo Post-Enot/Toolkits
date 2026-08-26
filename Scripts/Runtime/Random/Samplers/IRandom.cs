@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace PostEnot.Toolkits
@@ -17,12 +18,12 @@ namespace PostEnot.Toolkits
         /// <summary>
         /// Создаёт массив байтов заданной длины и заполняет его случайными значениями.
         /// </summary>
-        /// <param name="number">Количество байтов в массиве. Должно быть неотрицательным.</param>
+        /// <param name="length">Количество байтов в массиве. Должно быть неотрицательным.</param>
         /// <returns>Массив байтов, заполненный случайными значениями.</returns>
         /// <exception cref="ArgumentOutOfRangeException">
-        /// Выбрасывается, если <paramref name="number"/> меньше нуля.
+        /// Выбрасывается, если <paramref name="length"/> меньше нуля.
         /// </exception>
-        public byte[] NextBytes(int number);
+        public byte[] NextBytes(int length);
 
         /// <summary>
         /// Заполняет указанный буфер случайными байтами.
@@ -190,6 +191,9 @@ namespace PostEnot.Toolkits
         /// <exception cref="ArgumentOutOfRangeException">
         /// Выбрасывается, если <paramref name="maxExclusive"/> отрицательна, равна <see cref="float.NaN"/> или <see cref="float.PositiveInfinity"/>.
         /// </exception>
+        /// <remarks>
+        /// Строгое соответствие результата диапазону не гарантируется при субнормальном <paramref name="maxExclusive"/>.
+        /// </remarks>
         public float NextSingle(float maxExclusive);
 
         /// <summary>
@@ -203,6 +207,9 @@ namespace PostEnot.Toolkits
         /// Выбрасывается, если <paramref name="minInclusive"/> больше <paramref name="maxExclusive"/>,
         /// или любой из параметров равен <see cref="float.NaN"/> или бесконечности.
         /// </exception>
+        /// <remarks>
+        /// Строгое соответствие результата диапазону не гарантируется при субнормальном <paramref name="minInclusive"/> или <paramref name="maxExclusive"/>.
+        /// </remarks>
         public float NextSingle(float minInclusive, float maxExclusive);
 
         /// <summary>
@@ -219,6 +226,9 @@ namespace PostEnot.Toolkits
         /// <exception cref="ArgumentOutOfRangeException">
         /// Выбрасывается, если <paramref name="maxExclusive"/> отрицательна, равна <see cref="double.NaN"/> или <see cref="double.PositiveInfinity"/>.
         /// </exception>
+        /// <remarks>
+        /// Строгое соответствие результата диапазону не гарантируется при субнормальном <paramref name="maxExclusive"/>.
+        /// </remarks>
         public double NextDouble(double maxExclusive);
 
         /// <summary>
@@ -232,6 +242,9 @@ namespace PostEnot.Toolkits
         /// Выбрасывается, если <paramref name="minInclusive"/> больше <paramref name="maxExclusive"/>,
         /// или любой из параметров равен <see cref="double.NaN"/> или бесконечности.
         /// </exception>
+        /// <remarks>
+        /// Строгое соответствие результата диапазону не гарантируется при субнормальном <paramref name="minInclusive"/> или <paramref name="maxExclusive"/>.
+        /// </remarks>
         public double NextDouble(double minInclusive, double maxExclusive);
 
         /// <summary>
@@ -280,6 +293,14 @@ namespace PostEnot.Toolkits
         public void Shuffle<T>(T[] array);
 
         /// <summary>
+        /// Перемешивает элементы в указанном списке.
+        /// </summary>
+        /// <typeparam name="T">Тип элементов списка.</typeparam>
+        /// <param name="list">Перемешиваемый список.</param>
+        /// <exception cref="ArgumentNullException">Если <paramref name="list"/> равен <see langword="null"/>.</exception>
+        public void Shuffle<T>(IList<T> list);
+
+        /// <summary>
         /// Возвращает случайный элемент из диапазона.
         /// </summary>
         /// <typeparam name="T">Тип элементов диапазона.</typeparam>
@@ -297,6 +318,16 @@ namespace PostEnot.Toolkits
         /// <exception cref="ArgumentException">Если массив пуст.</exception>
         /// <exception cref="ArgumentNullException">Если <paramref name="array"/> равен <see langword="null"/>.</exception>
         public T NextElement<T>(T[] array);
+
+        /// <summary>
+        /// Возвращает случайный элемент из списка.
+        /// </summary>
+        /// <typeparam name="T">Тип элементов списка.</typeparam>
+        /// <param name="list">Список, из которого выбирается элемент.</param>
+        /// <returns>Случайный элемент списка.</returns>
+        /// <exception cref="ArgumentException">Если список пуст.</exception>
+        /// <exception cref="ArgumentNullException">Если <paramref name="list"/> равен <see langword="null"/>.</exception>
+        public T NextElement<T>(IReadOnlyList<T> list);
 
         /// <summary>
         /// Создает массив заданной длины и заполняет его случайными элементами из указанного набора.

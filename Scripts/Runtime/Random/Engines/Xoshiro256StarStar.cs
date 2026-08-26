@@ -38,7 +38,7 @@ namespace PostEnot.Toolkits.RandomEngines
         {
             if (buffer.Length < StateSizeInBytes)
             {
-                throw new ArgumentException("Buffer is too small.", nameof(buffer));
+                throw RandomUtilities.ExceptionBufferTooSmall(nameof(buffer), StateSizeInBytes);
             }
             BinaryPrimitives.WriteUInt64LittleEndian(buffer[..8], State0);
             BinaryPrimitives.WriteUInt64LittleEndian(buffer.Slice(8, 8), State1);
@@ -50,7 +50,7 @@ namespace PostEnot.Toolkits.RandomEngines
         {
             if (!TrySetState(state))
             {
-                throw new ArgumentException("Invalid state.", nameof(state));
+                throw RandomUtilities.ExceptionInvalidState(nameof(state));
             }
         }
 
@@ -65,6 +65,35 @@ namespace PostEnot.Toolkits.RandomEngines
             State2 = BinaryPrimitives.ReadUInt64LittleEndian(state.Slice(16, 8));
             State3 = BinaryPrimitives.ReadUInt64LittleEndian(state.Slice(24, 8));
             return true;
+        }
+
+        public void Discard()
+        {
+            unchecked
+            {
+                ulong t = State1 << 17;
+                State2 ^= State0;
+                State3 ^= State1;
+                State1 ^= State2;
+                State0 ^= State3;
+                State2 ^= t;
+                State3 = RotateLeft(State3, 45);
+            }
+        }
+
+        public void Discard(int number)
+        {
+            if (number < 0)
+            {
+                throw RandomUtilities.ExceptionDiscardNumberLessThanZero(nameof(number));
+            }
+            unchecked
+            {
+                for (int i = 0; i < number; i += 1)
+                {
+                    Discard();
+                }
+            }
         }
 
         public bool NextBoolean() => NextUInt64() >> 63 == 1;

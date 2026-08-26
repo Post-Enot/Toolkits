@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Buffers.Binary;
+using System.Runtime.CompilerServices;
 
 namespace PostEnot.Toolkits.RandomEngines
 {
@@ -34,9 +35,7 @@ namespace PostEnot.Toolkits.RandomEngines
         {
             if (buffer.Length < StateSizeInBytes)
             {
-                throw new ArgumentException(
-                    $"Buffer is too small. Expected at least {StateSizeInBytes} bytes.",
-                    nameof(buffer));
+                throw RandomUtilities.ExceptionBufferTooSmall(nameof(buffer), StateSizeInBytes);
             }
             BinaryPrimitives.WriteUInt64LittleEndian(buffer, State);
             BinaryPrimitives.WriteUInt64LittleEndian(buffer[8..], Increment);
@@ -46,7 +45,7 @@ namespace PostEnot.Toolkits.RandomEngines
         {
             if (!TrySetState(state))
             {
-                throw new ArgumentException("Invalid state. Expected at least 16 bytes.", nameof(state));
+                throw RandomUtilities.ExceptionInvalidState(nameof(state));
             }
         }
 
@@ -61,6 +60,27 @@ namespace PostEnot.Toolkits.RandomEngines
             State = newState;
             Increment = newIncrement;
             return true;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Discard()
+        {
+            unchecked
+            {
+                State = State * Multiplier + Increment;
+            }
+        }
+
+        public void Discard(int number)
+        {
+            if (number < 0)
+            {
+                throw RandomUtilities.ExceptionDiscardNumberLessThanZero(nameof(number));
+            }
+            for (int i = 0; i < number; i += 1)
+            {
+                Discard();
+            }
         }
 
         public bool NextBoolean() => (NextUInt32() >> 31) == 1;

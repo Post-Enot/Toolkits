@@ -38,5 +38,14 @@ namespace PostEnot.Toolkits.RandomEngines
                 }
             }
         }
+
+        internal static ArgumentException ExceptionBufferTooSmall(string paramName, int stateSizeInBytes)
+            => new($"Buffer is too small. Expected at least {stateSizeInBytes} bytes.", paramName);
+
+        internal static ArgumentException ExceptionInvalidState(string paramName)
+            => new("Invalid state.", paramName);
+
+        internal static ArgumentOutOfRangeException ExceptionDiscardNumberLessThanZero(string paramName)
+            => new(paramName, $"{paramName} must be greater than or equal to zero.");
     }
 }
