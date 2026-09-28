@@ -79,6 +79,19 @@ namespace PostEnot.Toolkits
             Velocity = default;
         }
 
+        /// <summary>
+        /// Сбрасывает состояние интерполятора, устанавливая <see cref="Current"/> в <paramref name="current"/>,
+        /// <see cref="Target"/> в <paramref name="target"/> и <see cref="Velocity"/> в <see langword="default"/>.
+        /// </summary>
+        /// <param name="current">Значение, устанавливаемое в <see cref="Current"/>.</param>
+        /// <param name="target">Значение, устанавливаемое в <see cref="Target"/>.</param>
+        public virtual void ResetTo(TValue current, TValue target)
+        {
+            Current = current;
+            Target = target;
+            Velocity = default;
+        }
+
         public virtual bool Approximately() => Approximately(Mathf.Epsilon);
 
         public abstract bool Approximately(float epsilon);
