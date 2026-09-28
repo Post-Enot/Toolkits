@@ -92,8 +92,31 @@ namespace PostEnot.Toolkits
             Velocity = default;
         }
 
+        /// <summary>
+        /// Проверяет, достигло ли текущее значение <see cref="Current"/> целевого значения <see cref="Target"/>
+        /// с точностью <see cref="Mathf.Epsilon"/>.
+        /// </summary>
+        /// <returns>
+        /// <see langword="true"/>, если <see cref="Current"/> и <see cref="Target"/> считаются приблизительно равными;
+        /// иначе <see langword="false"/>.
+        /// </returns>
+        /// <remarks>
+        /// Эквивалентно вызову <see cref="Approximately(float)"/> с <see cref="Mathf.Epsilon"/> в качестве погрешности.
+        /// </remarks>
         public virtual bool Approximately() => Approximately(Mathf.Epsilon);
 
+        /// <summary>
+        /// Проверяет, достигло ли текущее значение <see cref="Current"/> целевого значения <see cref="Target"/>
+        /// с заданной погрешностью <paramref name="epsilon"/>.
+        /// </summary>
+        /// <param name="epsilon">
+        /// Допустимая погрешность сравнения. Значение приводится к модулю, поэтому отрицательное значение
+        /// эквивалентно положительному.
+        /// </param>
+        /// <returns>
+        /// <see langword="true"/>, если <see cref="Current"/> и <see cref="Target"/> считаются приблизительно равными;
+        /// иначе <see langword="false"/>.
+        /// </returns>
         public abstract bool Approximately(float epsilon);
 
         /// <summary>
