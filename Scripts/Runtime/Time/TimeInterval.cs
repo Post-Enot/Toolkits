@@ -1,4 +1,6 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.Globalization;
 
 namespace PostEnot.Toolkits
@@ -9,10 +11,10 @@ namespace PostEnot.Toolkits
     /// </summary>
     public readonly struct TimeInterval : IEquatable<TimeInterval>, IFormattable
     {
-        internal TimeInterval(float startTime, float duration)
+        internal TimeInterval(float duration, float startTime)
         {
-            StartTime = startTime;
             Duration = duration;
+            StartTime = startTime;
         }
 
         /// <summary>
@@ -21,18 +23,13 @@ namespace PostEnot.Toolkits
         public static TimeInterval Zero => new();
 
         /// <summary>
-        /// Возвращает временной интервал с бесконечной (<see cref="float.PositiveInfinity"/>) продолжительностью и нулевой точкой отсчёта.
+        /// Длительность интервала.
         /// </summary>
-        public static TimeInterval Infinity => new(0.0f, float.PositiveInfinity);
-
+        public readonly float Duration { get; }
         /// <summary>
         /// Начальное время интервала, она же точка отсчёта.
         /// </summary>
         public readonly float StartTime { get; }
-        /// <summary>
-        /// Длительность интервала.
-        /// </summary>
-        public readonly float Duration { get; }
         /// <summary>
         /// Время завершения интервала (<see cref="StartTime"/> + <see cref="Duration"/>).
         /// </summary>
@@ -58,7 +55,7 @@ namespace PostEnot.Toolkits
 
         /// <summary>
         /// Возвращает прошедшее время от начала интервала до указанного момента, ограниченное длительностью.
-        /// Значение не превышает <see cref="Duration"/> и может быть отрицательным.
+        /// Значение не превышает <see cref="Duration"/> и не может быть меньше 0.
         /// </summary>
         /// <param name="currentTime">Текущий момент времени.</param>
         /// <returns>Прошедшее время в пределах [0, <see cref="Duration"/>].</returns>
@@ -173,12 +170,12 @@ namespace PostEnot.Toolkits
 
         /// <summary>
         /// Создаёт новый интервал с той же длительностью и новым начальным временем, равным указанному текущему моменту.
-        /// Это эквивалентно перезапуску интервала с данным <paramref name="currentTime"/>.
+        /// Это эквивалентно перезапуску интервала с данным <paramref name="startTime"/>.
         /// </summary>
-        /// <param name="currentTime">Новый начальный момент времени.</param>
+        /// <param name="startTime">Новый начальный момент времени.</param>
         /// <returns>Новый экземпляр <see cref="TimeInterval"/> с тем же <see cref="Duration"/> и <see cref="StartTime"/>
-        /// = <paramref name="currentTime"/>.</returns>
-        public readonly TimeInterval Restart(float currentTime) => new(currentTime, Duration);
+        /// = <paramref name="startTime"/>.</returns>
+        public readonly TimeInterval Restart(float startTime) => new(Duration, startTime);
 
         /// <summary>
         /// Возвращает новый интервал, который обращает оставшееся (ограниченное) время:
@@ -191,8 +188,10 @@ namespace PostEnot.Toolkits
         public readonly TimeInterval Reverse(float currentTime)
         {
             float startTime = TimeUtility.Reverse(StartTime, currentTime, Duration);
-            return new TimeInterval(startTime, Duration);
+            return new TimeInterval(Duration, startTime);
         }
+
+        public readonly TimeStamp Stamp(float currentTime) => TimeStamp.CreateUnsafe(Duration, StartTime, currentTime, 0.0f);
 
         /// <summary>
         /// Возвращает новый интервал, который обращает оставшееся (неограниченное) время
@@ -204,29 +203,51 @@ namespace PostEnot.Toolkits
         public readonly TimeInterval ReverseUnclamped(float currentTime)
         {
             float startTime = TimeUtility.ReverseUnclamped(StartTime, currentTime, Duration);
-            return new TimeInterval(startTime, Duration);
+            return new TimeInterval(Duration, startTime);
         }
 
         public readonly bool Equals(TimeInterval other) => (StartTime == other.StartTime) && (Duration == other.Duration);
 
-        public readonly string ToString(string format, IFormatProvider formatProvider)
+        public readonly override bool Equals(object? obj) => obj is TimeInterval other && Equals(other);
+
+        public readonly string ToString(string? format, IFormatProvider? formatProvider)
         {
             if (string.IsNullOrEmpty(format))
             {
                 format = _defaultFormat;
             }
-            formatProvider ??= CultureInfo.InvariantCulture.NumberFormat;
-            return $"{nameof(TimeInterval)} {{ {nameof(StartTime)} = {StartTime.ToString(_defaultFormat, formatProvider)}, " +
-                   $"{nameof(Duration)} = {Duration.ToString(_defaultFormat, formatProvider)} }}"; ;
+            formatProvider ??= CultureInfo.CurrentCulture.NumberFormat;
+            return ToString_Internal(format, formatProvider);
         }
 
-        public override string ToString()
-            => $"{nameof(TimeInterval)} {{ {nameof(StartTime)} = {StartTime.ToString(_defaultFormat)}, " +
-               $"{nameof(Duration)} = {Duration.ToString(_defaultFormat)} }}";
+        public readonly string ToString(IFormatProvider? formatProvider)
+        {
+            formatProvider ??= CultureInfo.CurrentCulture.NumberFormat;
+            return ToString_Internal(_defaultFormat, formatProvider);
+        }
 
-        public readonly override bool Equals(object obj) => obj is TimeInterval other && Equals(other);
+        public readonly string ToString(string? format)
+        {
+            if (string.IsNullOrEmpty(format))
+            {
+                format = _defaultFormat;
+            }
+            return ToString_Internal(format, CultureInfo.CurrentCulture.NumberFormat);
+        }
+
+        public readonly override string ToString() => ToString_Internal(_defaultFormat, CultureInfo.CurrentCulture.NumberFormat);
 
         public readonly override int GetHashCode() => HashCode.Combine(StartTime, Duration);
+
+        public readonly void Deconstruct(out float duration, out float startTime)
+        {
+            duration = Duration;
+            startTime = StartTime;
+        }
+
+        private readonly string ToString_Internal(string format, IFormatProvider formatProvider)
+            => $"{nameof(TimeInterval)} {{ {nameof(StartTime)} = {StartTime.ToString(format, formatProvider)}, " +
+               $"{nameof(Duration)} = {Duration.ToString(format, formatProvider)} }}";
 
         #region FabricMethods
         /// <summary>
@@ -244,9 +265,9 @@ namespace PostEnot.Toolkits
             }
             if (duration < 0.0f)
             {
-                throw new ArgumentOutOfRangeException(nameof(duration), $"{duration} must be positive number.");
+                throw new ArgumentOutOfRangeException(nameof(duration), $"{duration} must be positive.");
             }
-            return new TimeInterval(0.0f, duration);
+            return new TimeInterval(duration, 0.0f);
         }
 
         /// <summary>
@@ -267,13 +288,13 @@ namespace PostEnot.Toolkits
             }
             if (duration < 0.0f)
             {
-                throw new ArgumentOutOfRangeException(nameof(duration), $"{duration} must be positive number.");
+                throw new ArgumentOutOfRangeException(nameof(duration), $"{duration} must be positive.");
             }
             if (float.IsNaN(startTime))
             {
                 throw new ArgumentException($"{nameof(startTime)} can not be NaN.", nameof(startTime));
             }
-            return new TimeInterval(startTime, duration);
+            return new TimeInterval(duration, startTime);
         }
 
         /// <summary>
@@ -282,7 +303,7 @@ namespace PostEnot.Toolkits
         /// </summary>
         /// <param name="duration">Длительность интервала.</param>
         /// <returns>Новый экземпляр <see cref="TimeInterval"/>.</returns>
-        public static TimeInterval CreateUnsafe(float duration) => new(0.0f, duration);
+        public static TimeInterval CreateUnsafe(float duration) => new(duration, 0.0f);
 
         /// <summary>
         /// Создаёт новый интервал с указанными начальным временем и длительностью без проверки аргументов.
@@ -291,7 +312,7 @@ namespace PostEnot.Toolkits
         /// <param name="duration">Длительность интервала.</param>
         /// <param name="startTime">Начальное время.</param>
         /// <returns>Новый экземпляр <see cref="TimeInterval"/>.</returns>
-        public static TimeInterval CreateUnsafe(float duration, float startTime) => new(startTime, duration);
+        public static TimeInterval CreateUnsafe(float duration, float startTime) => new(duration, startTime);
 
         /// <summary>
         /// Создаёт интервал, который уже завершён к моменту времени 0 (начальное время равно -<paramref name="duration"/>).
@@ -309,9 +330,9 @@ namespace PostEnot.Toolkits
             }
             if (duration < 0.0f)
             {
-                throw new ArgumentOutOfRangeException(nameof(duration), $"{duration} must be positive number.");
+                throw new ArgumentOutOfRangeException(nameof(duration), $"{duration} must be positive.");
             }
-            return new TimeInterval(-duration, duration);
+            return new TimeInterval(duration, -duration);
         }
 
         /// <summary>
@@ -337,10 +358,10 @@ namespace PostEnot.Toolkits
             }
             if (duration < 0.0f)
             {
-                throw new ArgumentOutOfRangeException(nameof(duration), $"{duration} must be positive number.");
+                throw new ArgumentOutOfRangeException(nameof(duration), $"{duration} must be positive.");
             }
             float startTime = currentTime - duration;
-            return new TimeInterval(startTime, duration);
+            return new TimeInterval(duration, startTime);
         }
 
         /// <summary>
@@ -349,7 +370,7 @@ namespace PostEnot.Toolkits
         /// </summary>
         /// <param name="duration">Длительность интервала.</param>
         /// <returns>Завершённый экземпляр <see cref="TimeInterval"/>.</returns>
-        public static TimeInterval CreateCompletedUnsafe(float duration) => new(-duration, duration);
+        public static TimeInterval CreateCompletedUnsafe(float duration) => new(duration, -duration);
 
         /// <summary>
         /// Создаёт интервал, завершённый к указанному текущему времени, без проверки аргументов.
@@ -361,7 +382,7 @@ namespace PostEnot.Toolkits
         public static TimeInterval CreateCompletedUnsafe(float duration, float currentTime)
         {
             float startTime = currentTime - duration;
-            return new TimeInterval(startTime, duration);
+            return new TimeInterval(duration, startTime);
         }
         #endregion
 

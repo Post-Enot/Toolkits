@@ -1,4 +1,6 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.Runtime.CompilerServices;
 
 namespace PostEnot.Toolkits
@@ -12,7 +14,8 @@ namespace PostEnot.Toolkits
         public static float Elapsed(float startTime, float currentTime, float duration)
         {
             float elapsedUnclamped = ElapsedUnclamped(startTime, currentTime);
-            return MathF.Min(elapsedUnclamped, duration);
+            float elapsedMinClamped = MathF.Min(elapsedUnclamped, duration);
+            return MathF.Max(0.0f, elapsedMinClamped);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
